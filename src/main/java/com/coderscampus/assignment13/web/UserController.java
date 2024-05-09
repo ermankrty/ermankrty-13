@@ -70,14 +70,44 @@ public class UserController {
 	}
 	
 	@PostMapping("/users/{userId}")
-	public String postOneUser (@PathVariable Long userId, User user) {
-		User existingUser = userService.findByIdWithAccounts(userId);
-		user.setAccounts(existingUser.getAccounts());
-		Address address = addressService.save(user.getAddress());
-		user.setAddress(address);
-		userService.saveUser(user);
-		return "redirect:/users/"+user.getUserId();
+	public String postOneUser(@PathVariable Long userId, @ModelAttribute User updatedUser) {
+	    // Retrieve the existing user from the database
+	    User existingUser = userService.findByIdWithAccounts(userId);
+	    
+	    if (existingUser != null) {
+	        // Update the properties of the existing user with the values from the updated user
+	        existingUser.setUsername(updatedUser.getUsername());
+	        existingUser.setPassword(updatedUser.getPassword());
+	        existingUser.setName(updatedUser.getName());
+	        
+	        // Ensure that the address is set and update its properties
+	        Address updatedAddress = updatedUser.getAddress();
+	        if (updatedAddress != null) {
+	            Address existingAddress = existingUser.getAddress();
+	            if (existingAddress == null) {
+	                existingAddress = new Address();
+	                existingAddress.setUser(existingUser);
+	                existingUser.setAddress(existingAddress);
+	            }
+	            existingAddress.setAddressLine1(updatedAddress.getAddressLine1());
+	            existingAddress.setAddressLine2(updatedAddress.getAddressLine2());
+	            existingAddress.setCity(updatedAddress.getCity());
+	            existingAddress.setState(updatedAddress.getState());
+	            existingAddress.setCountry(updatedAddress.getCountry());
+	            existingAddress.setZipCode(updatedAddress.getZipCode());
+	        }
+	        
+	        // Save the updated user
+	        userService.saveUser(existingUser);
+	    } else {
+	        return "redirect:/error/";
+	    }
+	    
+	    // Redirect to the user details page
+	    return "redirect:/users/";
 	}
+
+
 	
 	@PostMapping("/users/{userId}/delete")
 	public String deleteOneUser (@PathVariable Long userId) {
