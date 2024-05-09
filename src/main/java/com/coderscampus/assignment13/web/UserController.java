@@ -71,16 +71,14 @@ public class UserController {
 	
 	@PostMapping("/users/{userId}")
 	public String postOneUser(@PathVariable Long userId, @ModelAttribute User updatedUser) {
-	    // Retrieve the existing user from the database
-	    User existingUser = userService.findByIdWithAccounts(userId);
+
+		User existingUser = userService.findByIdWithAccounts(userId);
 	    
 	    if (existingUser != null) {
-	        // Update the properties of the existing user with the values from the updated user
 	        existingUser.setUsername(updatedUser.getUsername());
 	        existingUser.setPassword(updatedUser.getPassword());
 	        existingUser.setName(updatedUser.getName());
 	        
-	        // Ensure that the address is set and update its properties
 	        Address updatedAddress = updatedUser.getAddress();
 	        if (updatedAddress != null) {
 	            Address existingAddress = existingUser.getAddress();
@@ -97,13 +95,11 @@ public class UserController {
 	            existingAddress.setZipCode(updatedAddress.getZipCode());
 	        }
 	        
-	        // Save the updated user
 	        userService.saveUser(existingUser);
 	    } else {
 	        return "redirect:/error/";
 	    }
 	    
-	    // Redirect to the user details page
 	    return "redirect:/users/";
 	}
 
